@@ -454,19 +454,32 @@ impl<T: 'static> EventLoop<T> {
             },
             InputEvent::TextEvent(ime_state) => {
                 let window_id = window::WindowId(WindowId);
-                let event = event::Event::WindowEvent {
-                    event: event::WindowEvent::TextInputState(TextInputState {
-                        text: ime_state.text.to_owned(),
-                        selection: TextSpan {
-                            start: ime_state.selection.start,
-                            end: ime_state.selection.end,
-                        },
+                let events = [
+                    // Send a preedit event so the application knows to expect a commit event
+                    event::Ime::Preedit("".to_string(), None),
+                    // Delete all of the current text
+                    event::Ime::DeleteSurroundingText {
+                        before_length: usize::MAX,
+                        after_length: usize::MAX,
+                    },
+                    // Replace the previously deleted text with our updated text, and set the
+                    // cursor and compose region
+                    event::Ime::Commit {
+                        content: ime_state.text.to_string(),
+                        selection: Some((ime_state.selection.start, ime_state.selection.end)),
                         compose_region: ime_state
                             .compose_region
-                            .map(|region| TextSpan { start: region.start, end: region.end }),
-                    }),
-                };
-                app.window_event(self.window_target(), window_id, event);
+                            .map(|region| (region.start, region.end)),
+                    },
+                ];
+
+                events.into_iter().for_each(|event| {
+                    app.window_event(
+                        self.window_target(),
+                        window_id,
+                        event::WindowEvent::Ime(event),
+                    );
+                });
             },
             _ => {
                 warn!("Unknown android_activity input event {event:?}")
@@ -904,29 +917,21 @@ impl Window {
 
     pub fn set_ime_cursor_area(&self, _position: Position, _size: Size) {}
 
-    pub fn set_ime_allowed(&self, _allowed: bool) {}
+    pub fn set_ime_allowed(&self, allowed: bool) {
+        if allowed {
+            self.app.show_soft_input(true);
+        } else {
+            self.app.hide_soft_input(true);
+        }
+    }
 
     pub fn set_ime_purpose(&self, _purpose: ImePurpose) {}
 
-    pub fn begin_ime_input(&self) {
-        self.app.show_soft_input(true);
-    }
-
-    pub fn end_ime_input(&self) {
-        self.app.hide_soft_input(true);
-    }
-
-    pub fn set_text_input_state(&self, state: TextInputState) {
+    pub fn set_ime_surrounding_text(&self, text: String, selection: (usize, usize)) {
         self.app.set_text_input_state(android_activity::input::TextInputState {
-            text: state.text,
-            selection: android_activity::input::TextSpan {
-                start: state.selection.start,
-                end: state.selection.end,
-            },
-            compose_region: state.compose_region.map(|region| android_activity::input::TextSpan {
-                start: region.start,
-                end: region.end,
-            }),
+            text,
+            selection: android_activity::input::TextSpan { start: selection.0, end: selection.1 },
+            compose_region: None,
         });
     }
 
@@ -1053,8 +1058,6 @@ impl Window {
 
 #[derive(Default, Clone, Debug)]
 pub struct OsError;
-
-use crate::event::{TextInputState, TextSpan};
 
 use std::fmt::{self, Display, Formatter};
 impl Display for OsError {
