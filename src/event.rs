@@ -230,6 +230,8 @@ pub enum WindowEvent {
     /// - **iOS / Android / Web / Orbital:** Unsupported.
     Ime(Ime),
 
+    TextInputState(TextInputState),
+
     /// The cursor has moved on the window.
     ///
     /// ## Platform-specific
@@ -1182,4 +1184,28 @@ mod tests {
             event::Force::Calibrated { force: 0.0, max_possible_force: 0.0, altitude_angle: None }
                 .clone();
     }
+}
+
+/// This struct holds a span within a region of text from `start` (inclusive) to
+/// `end` (exclusive).
+///
+/// An empty span or cursor position is specified with `start == end`.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+pub struct TextSpan {
+    /// The start of the span (inclusive)
+    pub start: usize,
+
+    /// The end of the span (exclusive)
+    pub end: usize,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+pub struct TextInputState {
+    pub text: String,
+    /// A selection defined on the text.
+    pub selection: TextSpan,
+    /// A composing region defined on the text.
+    pub compose_region: Option<TextSpan>,
 }

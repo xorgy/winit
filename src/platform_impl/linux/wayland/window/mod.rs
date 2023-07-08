@@ -16,7 +16,7 @@ use tracing::warn;
 
 use crate::dpi::{LogicalSize, PhysicalPosition, PhysicalSize, Position, Size};
 use crate::error::{ExternalError, NotSupportedError, OsError as RootOsError};
-use crate::event::{Ime, WindowEvent};
+use crate::event::{Ime, TextInputState, WindowEvent};
 use crate::event_loop::AsyncRequestSerial;
 use crate::platform_impl::{
     Fullscreen, MonitorHandle as PlatformMonitorHandle, OsError, PlatformIcon,

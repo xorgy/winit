@@ -29,7 +29,7 @@ use super::window::WinitWindow;
 use super::{ffi, Fullscreen, MonitorHandle, OsError, WindowId};
 use crate::dpi::{LogicalPosition, LogicalSize, PhysicalPosition, PhysicalSize, Position, Size};
 use crate::error::{ExternalError, NotSupportedError, OsError as RootOsError};
-use crate::event::WindowEvent;
+use crate::event::{TextInputState, WindowEvent};
 use crate::platform::macos::{OptionAsAlt, WindowExtMacOS};
 use crate::window::{
     Cursor, CursorGrabMode, Icon, ImePurpose, ResizeDirection, Theme, UserAttentionType,
@@ -1483,6 +1483,15 @@ impl WindowDelegate {
 
     #[inline]
     pub fn set_ime_purpose(&self, _purpose: ImePurpose) {}
+
+    #[inline]
+    pub fn begin_ime_input(&self) {}
+
+    #[inline]
+    pub fn end_ime_input(&self) {}
+
+    #[inline]
+    pub fn set_text_input_state(&self, state: TextInputState) {}
 
     #[inline]
     pub fn focus_window(&self) {

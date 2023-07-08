@@ -3,6 +3,7 @@ use std::fmt;
 
 use crate::dpi::{PhysicalPosition, PhysicalSize, Position, Size};
 use crate::error::{ExternalError, NotSupportedError};
+use crate::event::TextInputState;
 use crate::monitor::{MonitorHandle, VideoModeHandle};
 use crate::platform_impl::{self, PlatformSpecificWindowAttributes};
 
@@ -1302,6 +1303,23 @@ impl Window {
         )
         .entered();
         self.window.maybe_queue_on_main(move |w| w.set_ime_purpose(purpose))
+    }
+
+    /// Opens the IME input (soft keyboard) if the platform supports it.
+    /// Currently only supported on Android.
+    #[inline]
+    pub fn begin_ime_input(&self) {
+        self.window.begin_ime_input();
+    }
+
+    /// Hides the IME input (soft keyboard).
+    #[inline]
+    pub fn end_ime_input(&self) {
+        self.window.end_ime_input();
+    }
+
+    pub fn set_text_input_state(&self, state: TextInputState) {
+        self.window.set_text_input_state(state);
     }
 
     /// Brings the window to the front and sets input focus. Has no effect if the window is
