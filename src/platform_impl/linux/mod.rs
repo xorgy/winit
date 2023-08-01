@@ -21,7 +21,6 @@ use smol_str::SmolStr;
 use self::x11::{X11Error, XConnection, XError, XNotSupported};
 use crate::dpi::{PhysicalPosition, PhysicalSize, Position, Size};
 use crate::error::{EventLoopError, ExternalError, NotSupportedError, OsError as RootOsError};
-use crate::event::TextInputState;
 use crate::event_loop::{AsyncRequestSerial, ControlFlow, DeviceEvents, EventLoopClosed};
 use crate::icon::Icon;
 use crate::keyboard::Key;
@@ -527,6 +526,9 @@ impl Window {
     pub fn set_ime_purpose(&self, purpose: ImePurpose) {
         x11_or_wayland!(match self; Window(w) => w.set_ime_purpose(purpose))
     }
+
+    #[inline]
+    pub fn set_ime_surrounding_text(&self, _text: String, _selection: (usize, usize)) {}
 
     #[inline]
     pub fn focus_window(&self) {

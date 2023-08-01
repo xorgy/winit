@@ -1,6 +1,5 @@
 use crate::dpi::{PhysicalPosition, PhysicalSize, Position, Size};
 use crate::error::{ExternalError, NotSupportedError, OsError as RootOE};
-use crate::event::TextInputState;
 use crate::icon::Icon;
 use crate::window::{
     Cursor, CursorGrabMode, ImePurpose, ResizeDirection, Theme, UserAttentionType,
@@ -340,17 +339,7 @@ impl Inner {
     }
 
     #[inline]
-    pub fn begin_ime_input(&self) {
-        // Currently not implemented
-    }
-
-    #[inline]
-    pub fn end_ime_input(&self) {
-        // Currently not implemented
-    }
-
-    #[inline]
-    pub fn set_text_input_state(&self, state: TextInputState) {}
+    pub fn set_ime_surrounding_text(&self, _text: String, _selection: (usize, usize)) {}
 
     #[inline]
     pub fn focus_window(&self) {
