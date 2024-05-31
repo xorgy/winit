@@ -918,10 +918,40 @@ impl Window {
     pub fn set_ime_cursor_area(&self, _position: Position, _size: Size) {}
 
     pub fn set_ime_allowed(&self, allowed: bool) {
+        let app = self.app.clone();
+        use jni::{
+            objects::{JObject, JValue},
+            JavaVM,
+        };
+        let vm = unsafe { JavaVM::from_raw(app.vm_as_ptr() as _).unwrap() };
+        let activity = unsafe { JObject::from_raw(app.activity_as_ptr() as _) };
+        let mut env = vm.attach_current_thread().unwrap();
+        let view = env
+            .get_field(
+                &activity,
+                "mNativeContentView",
+                "Landroid/app/NativeActivity$NativeContentView;",
+            )
+            .unwrap()
+            .l()
+            .unwrap();
+        let wic = env
+            .call_method(
+                &view,
+                "getWindowInsetsController",
+                "()Landroid/view/WindowInsetsController;",
+                &[],
+            )
+            .unwrap()
+            .l()
+            .unwrap();
+        let window_insets_types = env.find_class("android/view/WindowInsets$Type").unwrap();
+        let ime_type =
+            env.call_static_method(&window_insets_types, "ime", "()I", &[]).unwrap().i().unwrap();
         if allowed {
-            self.app.show_soft_input(true);
+            let _ = env.call_method(&wic, "show", "(I)V", &[ime_type.into()]);
         } else {
-            self.app.hide_soft_input(true);
+            let _ = env.call_method(&wic, "hide", "(I)V", &[ime_type.into()]);
         }
     }
 
