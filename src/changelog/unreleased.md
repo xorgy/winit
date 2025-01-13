@@ -39,3 +39,7 @@ The migration guide could reference other migration examples in the current
 changelog entry.
 
 ## Unreleased
+
+### Added
+
+ - On X11, set an "area" attribute on XIM input connection to convey the cursor area.

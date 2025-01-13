@@ -1717,12 +1717,15 @@ impl UnownedWindow {
     }
 
     #[inline]
-    pub fn set_ime_cursor_area(&self, spot: Position, _size: Size) {
-        let (x, y) = spot.to_physical::<i32>(self.scale_factor()).into();
-        let _ = self.ime_sender.lock().unwrap().send(ImeRequest::Position(
+    pub fn set_ime_cursor_area(&self, spot: Position, size: Size) {
+        let PhysicalPosition { x, y } = spot.to_physical::<i16>(self.scale_factor());
+        let PhysicalSize { width, height } = size.to_physical::<u16>(self.scale_factor());
+        let _ = self.ime_sender.lock().unwrap().send(ImeRequest::Area(
             self.xwindow as ffi::Window,
             x,
             y,
+            width,
+            height,
         ));
     }
 
